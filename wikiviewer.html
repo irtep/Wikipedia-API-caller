@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+
+		<link href="https://fonts.googleapis.com/css?family=Permanent+Marker" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+
+				<!-- Latest compiled and minified CSS -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+		<!-- jQuery library -->
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+		<!-- Latest compiled JavaScript -->
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+		<title>Wikipedia viewer by Amorcitos</title>
+
+		<style>
+
+			body {
+
+				background-color: MediumSeaGreen; /* For browsers that do not support gradients */
+
+			}
+
+			#mainSection {
+
+				border: 10px solid blue;
+				border-radius: 15px;
+				text-align: center;
+				position: relative;
+				
+				top: 150px;
+				width: 300px;
+				height: 300px;
+				background-color: white;
+				background: linear-gradient(white, blue); /* Standard syntax (must be last) */
+				padding: 30px;
+
+				font-family: 'Permanent Marker', cursive;
+			}
+
+			.buto {
+
+				background-color: white;
+				background: linear-gradient(blue, white); /* Standard syntax (must be last) */
+				border-radius: 15px;
+				height: 40px;
+				font-family: 'Permanent Marker', cursive;
+
+			}
+
+			.buto:hover {
+
+				cursor: pointer;
+
+			}
+
+			#searchi {
+
+				border-radius: 15px;
+				height: 30px;
+				background-color: black;
+				color: yellow;
+
+			}
+
+			#searchResults {
+
+				border: 10px solid blue;
+				border-radius: 15px;
+				text-align: center;
+				position: relative;
+				background-color: white;
+
+				font-family: 'Roboto', sans-serif;
+
+			}
+
+		</style>
+
+	</head>
+
+	<body>
+
+		<div id="mainSection" class ="container-fluid">
+
+			Type search word here: <br>
+
+			<form>
+			
+				<input type="text" id="searchi"></input>
+				<br><br>
+				<input type="button" id="submit" onclick="searchaa()" value="Search wikipedia" class="buto"></input>
+
+			</form>
+			
+			<br>
+			
+			<input type="button" value="Random wikipedia article" onclick="randomi('https://en.wikipedia.org/wiki/Special:Random')" class= "buto"></input>
+
+			<br><br><br><br><br><br>
+
+			<div id = "searchResults" class = "invisible">
+
+				<p id="res1"></p>
+
+			</div>	<!-- searchResults ends-->
+
+		</div> <!-- FLUID CONTAINER ENDS-->	
+
+	</body>
+
+	<script>
+
+		function searchaa() {
+
+			var hakusana = document.getElementById("searchi").value;
+
+			console.log("searchaa clicked, value:", hakusana);
+
+			  $.ajax({ 
+
+			    url: "https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=" + hakusana + "&prop=info&inprop=url&utf8=&format=json",
+			 
+			   dataType: "jsonp",
+
+			   success: function(response) { 
+			   
+			       console.log(response.query);
+
+			       if (response.query.searchinfo.totalhits === 0) {
+
+			         console.log("no hits. value:",hakusana);
+			       
+			       }
+
+			       else {
+			       
+			       		document.getElementById("res1").innerHTML = ""; // clear old results
+
+			       	     for (var i = 0; i < response.query.search.length; i++){
+          					
+
+          					$('#res1').append('<p>' +response.query.search[i].title+ '</p>');
+          					document.getElementById("searchResults").classList.remove("invisible");
+     					
+     					} // for ends
+
+			       } // else ends
+
+			  },  
+			   error: function () {
+			    alert("Error retrieving search results, please refresh the page");
+			   }
+			 
+			 });
+		}
+
+		function randomi(url) {
+
+			console.log("random quote");
+
+			var win = window.open(url, '_blank');
+  			win.focus();
+
+		}
+
+		/*
+
+			var wikiURL = "https://en.wikipedia.org/w/api.php";
+			wikiURL += '?' + $.param({
+			    'action' : 'opensearch',
+			    'search' : 'your_search_term',
+			    'prop'  : 'revisions',
+			    'rvprop' : 'content',
+			    'format' : 'json',
+			    'limit' : 10
+			});
+
+			 $.ajax( {
+			    url: wikiURL,
+			    dataType: 'jsonp',
+			    success: function(data) {
+			       console.log(data);
+			    }
+			} );
+
+			https://en.wikipedia.org/w/api.php?action=opensearch&search=bee&limit=1&format=json
+
+			The response you get is an array with the data, easy to parse:
+
+			[
+			  "bee",
+			  [
+			    "Bee"
+			  ],
+			  [
+			    "Bees are flying insects closely related to wasps and ants, known for their role in pollination and, in the case of the best-known bee species, the European honey bee, for producing honey and beeswax."
+			  ],
+			  [	
+			    "https://en.wikipedia.org/wiki/Bee"
+			  ]
+			]
+			To get just the first paragraph limit=1 is what you need.
+
+			ith Padding) to get it to work.
+			function ajax (keyword) {
+			  $.ajax({ 
+			    url: "https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=" + keyword + "&prop=info&inprop=url&utf8=&format=json",
+			 
+			   dataType: "jsonp",
+			   success: function(response) {
+			       console.log(response.query);
+			       if (response.query.searchinfo.totalhits === 0) {
+			         showError(keyword);
+			       }
+			       else {
+			         showResults(response);
+			       }
+			  },
+			   error: function () {
+			    alert("Error retrieving search results, please refresh the page");
+			   }
+			 
+			 });
+			}
+		*/
+
+	</script>
+
+</html>
